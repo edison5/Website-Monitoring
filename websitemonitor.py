@@ -13,7 +13,8 @@ class Sitereport:
         self.availability = []  # self.availability[i] = int(0,1) at time self.time[i]
         self.responsetime = []  # self.responsetime[i] = responsetime at time self.time[i]
         self.lasttimeupdated = datetime.datetime.now()
-        self.alert = None
+        self.currentalert = None
+        self.allpreviousalerts=[]
 
     def report_stats(self, mins):
         """uses the funtions below to report
@@ -64,33 +65,34 @@ class Sitereport:
             self.availability.append(0)
         self.responsetime.append(response.elapsed.total_seconds())
 
-    def alerting(self):
+    def alert(self):
         """Computes the average availability of the
         last two minutes and if there is not an existing
         alert it creates it otherwise if the alert is recovered
         it notifies the user"""
-        now = datetime.datetime.now()
-        before = now - datetime.timedelta(minutes=2)
+        now_ = datetime.datetime.now()
+        before = now_ - datetime.timedelta(minutes=2)
         indextostart = self.find_index(before)
         availability = self.availability[indextostart:]
         average = sum(availability) / len(availability)
-        if average < 0.8 and self.alert == None:
-            self.alert_up(average, now)
-        elif average >= 0.8 and self.alert is not None:
-            self.alert_gone(self.alert)
+        if average < 0.8 and self.currentalert == None:
+            self.__alert_up(average, now_)
+        elif average >= 0.8 and self.currentalert is not None:
+            self.__alert_gone(self.currentalert)
 
-    def alert_up(self, average, now):
+    def __alert_up(self, average, now_):
         """Alerts if the website availability has
         dropped below 80% in the last to minutes"""
-        self.alert = Alert(self.site, average, now)
-        print(self.alert)
+        self.currentalert = Alert(self.site, average, now_)
+        self.allpreviousalerts.append(self.currentalert)
+        print(self.currentalert)
 
-    def alert_gone(self, alert):
+    def __alert_gone(self, alert):
         """Alerts that the alert for the website
         is gone"""
         print("Alert given at time {} for website {} being down is not valid anymore."
               "The website is up again at time {}".format(alert.time, alert.site, datetime.datetime.now()))
-        self.alert = None
+        self.currentalert = None
 
     def find_index(self, before):
         """the first index of self.time whose
@@ -119,27 +121,24 @@ if __name__ == '__main__':
         url = input("Please enter the url of your website (example: https://google.com) \n")
         interval = int(input("Please enter the check interval (in seconds) for the website above \n"))
         Sites.append(Sitereport(url,interval))
-
     globaltime = datetime.datetime.now()
-
     print("Initial report: \n")
     for site in Sites:
         site.add_stats()
         site.report_stats(10)
         print()
     time.sleep(10)
-
     while True:
         # do the report for 10 minutes
-        print("Report for the last 10 minutes: \n")
+        print("Report for the last {} minutes: \n".format(10))
         for site in Sites:
             now = datetime.datetime.now()
             dif = (now - site.lasttimeupdated).total_seconds()  # time since the last update
-            if dif > site.checkinterval:
+            if dif > site.checkinterval:  # check if enough time has passed compared to the site check interval
                 site.add_stats()
-            site.report_stats(10)
+            site.report_stats(10)  # report the stats for the last 10 mins
             print()
-            site.alerting()
+            site.alert()  # check if alert is triggered
             print()
 
         # now check if 1 minute has passed to do the report for 1h
