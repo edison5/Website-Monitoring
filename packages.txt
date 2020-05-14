@@ -1,4 +1,0 @@
-nose
-statistics
-datetime
-requests
