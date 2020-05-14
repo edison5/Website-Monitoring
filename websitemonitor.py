@@ -55,17 +55,20 @@ class Sitereport:
         """Logs the time of the update and
         appends the results from the request made"""
 
-        response = requests.get(self.site, timeout=5)
-        now = datetime.datetime.now()
-        self.lasttimeupdated = now
-        self.time.append(now)
-        if response.status_code == 200:  # site available
-            self.availability.append(1)
-        else:
-            self.availability.append(0)
-        self.responsetime.append(response.elapsed.total_seconds())
+        with requests.session() as session:
+            response = session.get(self.site, timeout=5)
+            now = datetime.datetime.now()
+            self.lasttimeupdated = now
+            self.time.append(now)
+            if response.status_code == 200:  # site available
+                self.availability.append(1)
+            else:
+                self.availability.append(0)
+            self.responsetime.append(response.elapsed.total_seconds())
+            session.close()
 
-    def alert(self):
+
+    def alert(self,printenabled=True):
         """Computes the average availability of the
         last two minutes and if there is not an existing
         alert it creates it otherwise if the alert is recovered
@@ -76,21 +79,25 @@ class Sitereport:
         availability = self.availability[indextostart:]
         average = sum(availability) / len(availability)
         if average < 0.8 and self.currentalert == None:
-            self.__alert_up(average, now_)
+            self.__alert_up(average, now_,printenabled)
         elif average >= 0.8 and self.currentalert is not None:
-            self.__alert_gone(self.currentalert)
+            self.__alert_gone(self.currentalert,printenabled)
 
-    def __alert_up(self, average, now_):
+    def __alert_up(self, average, now_,printenabled):
         """Alerts if the website availability has
         dropped below 80% in the last to minutes"""
         self.currentalert = Alert(self.site, average, now_)
         self.allpreviousalerts.append(self.currentalert)
-        print(self.currentalert)
+        if printenabled:
+            print("Hereeeeee")
+            print(self.currentalert)
 
-    def __alert_gone(self, alert):
+    def __alert_gone(self, alert,printenabled):
         """Alerts that the alert for the website
         is gone"""
-        print("Alert given at time {} for website {} being down is not valid anymore."
+        if (printenabled):
+            print("Thereeeeeee")
+            print("Alert given at time {} for website {} being down is not valid anymore."
               "The website is up again at time {}".format(alert.time, alert.site, datetime.datetime.now()))
         self.currentalert = None
 
@@ -102,6 +109,10 @@ class Sitereport:
             if time > before:
                 return i
         return 0
+
+
+    def close(self):
+        self.session.close()
 
 
 class Alert():

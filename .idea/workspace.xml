@@ -34,7 +34,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.websitemonitor">
+  <component name="RunManager" selected="Python tests.Unittests in test.py">
     <configuration name="websitemonitor" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="Website-Monitoring" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -73,8 +73,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.websitemonitor" />
         <item itemvalue="Python tests.Unittests in test.py" />
+        <item itemvalue="Python.websitemonitor" />
       </list>
     </recent_temporary>
   </component>
