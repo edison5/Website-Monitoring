@@ -126,12 +126,14 @@ class Alert():
                    .format(self.site, self.availability * 100, self.time))
 
 if __name__ == '__main__':
+    # User Input
     nrsites = int(input("Please enter the number of sites you want to monitor:\n"))
     Sites=[]
     for i in range(nrsites):
         url = input("Please enter the url of your website (example: https://google.com) \n")
         interval = int(input("Please enter the check interval (in seconds) for the website above \n"))
         Sites.append(Sitereport(url,interval))
+
     globaltime = datetime.datetime.now()
     print("Initial report: \n")
     for site in Sites:
@@ -162,3 +164,43 @@ if __name__ == '__main__':
             globaltime = currentime
             print()
         time.sleep(10)
+
+
+    #Solution for non-sleeping program
+
+    # tensectime = datetime.datetime.now()
+    # onehourtime = datetime.datetime.now()
+    # for site in Sites:
+    #     site.add_stats()
+    #     site.report_stats(10)
+    #     print()
+    #
+    # while True:
+    #     # case 10secs has passed
+    #     now = datetime.datetime.now()
+    #     if (now - tensectime).total_seconds() > 10:
+    #         for site in Sites:
+    #             site.report_stats(10)
+    #             print()
+    #         tensectime = now
+    #
+    #     # now check if enough time has passed for each of the sites interval
+    #     for site in Sites:
+    #         now = datetime.datetime.now()
+    #         dif = (now - site.lasttimeupdated).total_seconds()  # time since the last update
+    #         if dif > site.checkinterval:  # check if enough time has passed compared to the site check interval
+    #             site.add_stats()
+    #             site.alert()  # check for alerts since we just had a new update of site
+    #
+    #     # case 1 minute has passed to do the 1h report
+    #     for site in Sites:
+    #         currentime = datetime.datetime.now()
+    #         if (currentime - onehourtime).total_seconds() > 60:
+    #             print("Report for the last 1 hour: \n")
+    #             for site in Sites:
+    #                 site.report_stats(60)
+    #                 print()
+    #             onehourtime = currentime
+    #             print()
+
+
